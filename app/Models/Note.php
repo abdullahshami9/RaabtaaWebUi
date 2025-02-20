@@ -9,7 +9,13 @@ class Note extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'content', 'color_id', 'is_pinned'];
+    protected $fillable = [
+        'title',
+        'content',
+        'color_id',
+        'is_pinned',
+        'user_id'
+    ];
 
     protected $casts = [
         'is_pinned' => 'boolean',

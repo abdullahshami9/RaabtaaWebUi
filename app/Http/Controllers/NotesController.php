@@ -38,11 +38,13 @@ class NotesController extends Controller
             'title' => 'nullable|string|max:255',
             'content' => 'nullable|string',
             'color_id' => 'nullable|exists:colors,id',
-            'is_pinned' => 'boolean',
+            'is_pinned' => 'required|boolean',
         ]);
 
+        $validated['is_pinned'] = (bool) $validated['is_pinned'];
+        
         $note->update($validated);
-        $note->load('color'); // Load color relationship
+        $note->load('color');
         
         return response()->json($note);
     }

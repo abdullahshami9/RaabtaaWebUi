@@ -51,9 +51,11 @@ export default function Dashboard({ auth, notes: initialNotes, colors }) {
     const unpinnedNotes = filteredNotes.filter(note => !note.is_pinned);
 
     const handleNoteUpdate = (updatedNote) => {
-        setNotes(notes.map(note => 
-            note.id === updatedNote.id ? updatedNote : note
-        ));
+        setNotes(currentNotes => 
+            currentNotes.map(note => 
+                note.id === updatedNote.id ? updatedNote : note
+            )
+        );
     };
 
     const handleDeleteNote = async (noteId) => {

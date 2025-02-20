@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FaPlus } from 'react-icons/fa';
 import axios from 'axios';
 
@@ -6,10 +6,10 @@ const AddNote = ({ onAdd }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+    const formRef = useRef(null);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!content.trim() && !title.trim()) return;
+    const saveNote = async () => {
+        if (!content.trim() && !title.trim()) return false;
 
         try {
             const response = await axios.post('/notes', {
@@ -19,15 +19,43 @@ const AddNote = ({ onAdd }) => {
             onAdd(response.data);
             setTitle('');
             setContent('');
-            setIsExpanded(false);
+            return true;
         } catch (error) {
             console.error('Error adding note:', error);
+            return false;
         }
+    };
+
+    useEffect(() => {
+        const handleClickOutside = async (event) => {
+            if (formRef.current && !formRef.current.contains(event.target)) {
+                if (!title.trim() && !content.trim()) {
+                    setIsExpanded(false);
+                } else {
+                    // Auto-save if there's content
+                    const saved = await saveNote();
+                    if (saved) {
+                        setIsExpanded(false);
+                    }
+                }
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [title, content]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await saveNote();
     };
 
     return (
         <div className="max-w-2xl mx-auto mb-8">
             <form 
+                ref={formRef}
                 onSubmit={handleSubmit}
                 className={`bg-white rounded-lg shadow-md transition-all duration-200 ${
                     isExpanded ? 'p-6' : 'p-4'
