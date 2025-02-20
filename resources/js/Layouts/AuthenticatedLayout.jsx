@@ -139,6 +139,7 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
                                         <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
                                             <p className="text-sm font-medium text-gray-800 dark:text-white">{user.name}</p>
                                         </div>
+                                        <Dropdown.Link href={route('dashboard')}>Dashboard</Dropdown.Link>
                                         <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
                                             Log Out

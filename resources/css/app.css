@@ -167,3 +167,36 @@
 .modal-input:focus {
     @apply outline-none;
 }
+
+/* Add these to your existing styles */
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.tab-content-enter {
+    animation: scaleIn 0.2s ease-out;
+}
+
+.profile-tab {
+    transition: all 0.3s ease;
+}
+
+.profile-tab:hover {
+    transform: translateY(-2px);
+}
+
+.avatar-upload-hover {
+    transition: all 0.2s ease;
+}
+
+.avatar-upload-hover:hover {
+    background-color: rgba(0, 0, 0, 0.6);
+}
