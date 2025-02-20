@@ -4,57 +4,88 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/react';
+import SearchBar from '@/Components/Notes/SearchBar';
+import { IoRefresh, IoSettingsOutline } from 'react-icons/io5';
+import axios from 'axios';
+import NoteModal from '@/Components/Notes/NoteModal';
 
-export default function Authenticated({ user, header, children }) {
+export default function Authenticated({ user, children, searchQuery, setSearchQuery, viewMode, setViewMode }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [note, setNote] = useState(null);
+
+    const handleColorChange = async (colorId) => {
+        try {
+            const response = await axios.patch(`/notes/${note.id}`, {
+                color_id: colorId
+            });
+            setNote(response.data);
+        } catch (error) {
+            console.error('Error updating note color:', error);
+        }
+    };
+
+    const handlePinToggle = async () => {
+        try {
+            const response = await axios.patch(`/notes/${note.id}`, {
+                is_pinned: !note.is_pinned
+            });
+            setNote(response.data);
+        } catch (error) {
+            console.error('Error toggling pin:', error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white border-b border-gray-100">
+            <nav className="bg-white border-b border-gray-100 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex">
-                            <div className="shrink-0 flex items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
-                                </Link>
-                            </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
-                                    Dashboard
-                                </NavLink>
-                            </div>
+                    <div className="flex h-16 items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            <Link href="/" className="flex items-center space-x-2">
+                                <ApplicationLogo className="h-9 w-auto fill-current text-gray-800" />
+                                <span className="text-xl font-semibold text-gray-800">Keep</span>
+                            </Link>
                         </div>
 
-                        <div className="hidden sm:flex sm:items-center sm:ms-6">
-                            <div className="ms-3 relative">
+                        <div className="flex-1 max-w-3xl mx-8">
+                            <SearchBar
+                                searchQuery={searchQuery}
+                                setSearchQuery={setSearchQuery}
+                                viewMode={viewMode}
+                                setViewMode={setViewMode}
+                            />
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <button className="p-2 hover:bg-gray-100 rounded-full">
+                                <IoRefresh className="h-5 w-5 text-gray-600" />
+                            </button>
+                            <button className="p-2 hover:bg-gray-100 rounded-full">
+                                <IoSettingsOutline className="h-5 w-5 text-gray-600" />
+                            </button>
+                            <div className="relative">
                                 <Dropdown>
                                     <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150"
-                                            >
-                                                {user.name}
-
-                                                <svg
-                                                    className="ms-2 -me-0.5 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
+                                        <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center cursor-pointer hover:bg-gray-300 transition-colors">
+                                            {user.profile_photo_url ? (
+                                                <img
+                                                    src={user.profile_photo_url}
+                                                    alt={user.name}
+                                                    className="h-full w-full rounded-full object-cover"
+                                                />
+                                            ) : (
+                                                <span className="text-lg font-medium text-gray-600">
+                                                    {user.name.charAt(0).toUpperCase()}
+                                                </span>
+                                            )}
+                                        </div>
                                     </Dropdown.Trigger>
-
                                     <Dropdown.Content>
+                                        <div className="px-4 py-2 border-b border-gray-100">
+                                            <p className="text-sm font-medium text-gray-800">{user.name}</p>
+                                            {/* <p className="text-sm text-gray-500">{user.email}</p> */}
+                                        </div>
                                         <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
                                         <Dropdown.Link href={route('logout')} method="post" as="button">
                                             Log Out
@@ -63,63 +94,81 @@ export default function Authenticated({ user, header, children }) {
                                 </Dropdown>
                             </div>
                         </div>
-
-                        <div className="-me-2 flex items-center sm:hidden">
-                            <button
-                                onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                                className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out"
-                            >
-                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path
-                                        className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' sm:hidden'}>
-                    <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink href={route('dashboard')} active={route().current('dashboard')}>
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="pt-4 pb-1 border-t border-gray-200">
-                        <div className="px-4">
-                            <div className="font-medium text-base text-gray-800">{user.name}</div>
-                            <div className="font-medium text-sm text-gray-500">{user.email}</div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>Profile</ResponsiveNavLink>
-                            <ResponsiveNavLink method="post" href={route('logout')} as="button">
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
                     </div>
                 </div>
             </nav>
 
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">{header}</div>
-                </header>
-            )}
+            <main className="py-6">{children}</main>
 
-            <main>{children}</main>
+            {showModal && (
+                <NoteModal
+                    note={note}
+                    onClose={() => setShowModal(false)}
+                    onUpdate={setNote}
+                />
+            )}
         </div>
     );
 }
+
+const Note = ({ note, onUpdate }) => {
+    const [showModal, setShowModal] = useState(false);
+    
+    const handleColorChange = async (colorId) => {
+        try {
+            const response = await axios.patch(`/notes/${note.id}`, {
+                color_id: colorId
+            });
+            onUpdate(response.data);
+        } catch (error) {
+            console.error('Error updating note color:', error);
+        }
+    };
+
+    const handlePinToggle = async () => {
+        try {
+            const response = await axios.patch(`/notes/${note.id}`, {
+                is_pinned: !note.is_pinned
+            });
+            onUpdate(response.data);
+        } catch (error) {
+            console.error('Error toggling pin:', error);
+        }
+    };
+
+    return (
+        <div 
+            className={`note-card ${note.color ? `bg-${note.color.name}` : ''}`}
+            onClick={() => setShowModal(true)}
+        >
+            <div className="note-actions" onClick={e => e.stopPropagation()}>
+                <button
+                    onClick={handlePinToggle}
+                    className={`pin-button ${note.is_pinned ? 'pinned' : ''}`}
+                >
+                    📌
+                </button>
+                <div className="color-picker">
+                    {colors.map(color => (
+                        <button
+                            key={color.id}
+                            className={`color-option bg-${color.name}`}
+                            onClick={() => handleColorChange(color.id)}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            <h3>{note.title}</h3>
+            <p>{note.content}</p>
+
+            {showModal && (
+                <NoteModal
+                    note={note}
+                    onClose={() => setShowModal(false)}
+                    onUpdate={onUpdate}
+                />
+            )}
+        </div>
+    );
+};
