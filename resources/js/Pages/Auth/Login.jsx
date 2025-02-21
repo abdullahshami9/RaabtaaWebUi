@@ -106,10 +106,10 @@ export default function Login({ status, canResetPassword }) {
                                     <FaLock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    id="password"
-                                    type="password"
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                        id="password"
+                        type="password"
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
                                     placeholder="Password"
                                     className="pl-10 w-full px-4 py-2 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 rounded-lg bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500"
                                 />
@@ -117,25 +117,25 @@ export default function Login({ status, canResetPassword }) {
                             {errors.password && (
                                 <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
                             )}
-                        </div>
+                </div>
 
                         <div className="flex items-center justify-between">
                             <div className="flex items-center">
                                 <input
                                     type="checkbox"
                                     id="remember"
-                                    checked={data.remember}
-                                    onChange={(e) => setData('remember', e.target.checked)}
+                            checked={data.remember}
+                            onChange={(e) => setData('remember', e.target.checked)}
                                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                />
+                        />
                                 <label htmlFor="remember" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                                     Remember me
-                                </label>
-                            </div>
+                    </label>
+                </div>
 
-                            {canResetPassword && (
-                                <Link
-                                    href={route('password.request')}
+                    {canResetPassword && (
+                        <Link
+                            href={route('password.request')}
                                     className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                                 >
                                     Forgot password?

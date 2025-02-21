@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\SurveyController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -45,6 +46,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Colors
     Route::get('/colors', [ColorController::class, 'index']);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/survey', [SurveyController::class, 'show'])->name('survey');
+    Route::post('/survey', [SurveyController::class, 'store']);
 });
 
 require __DIR__.'/auth.php';

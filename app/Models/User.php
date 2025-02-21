@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'usage_type',
+        'has_completed_survey'
     ];
 
     /**
@@ -46,5 +48,10 @@ class User extends Authenticatable
     public function notes()
     {
         return $this->hasMany(Note::class);
+    }
+
+    public function socialLinks()
+    {
+        return $this->hasMany(SocialLink::class);
     }
 }

@@ -72,7 +72,7 @@ export default function Register() {
                                 </span>
                             </div>
                         </div>
-                    </div>
+                </div>
 
                     <form onSubmit={submit} className="mt-6 space-y-6">
                         <div>
@@ -101,10 +101,10 @@ export default function Register() {
                                     <FaEnvelope className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    id="email"
-                                    type="email"
-                                    value={data.email}
-                                    onChange={(e) => setData('email', e.target.value)}
+                        id="email"
+                        type="email"
+                        value={data.email}
+                        onChange={(e) => setData('email', e.target.value)}
                                     placeholder="Email address"
                                     className="pl-10 w-full px-4 py-2 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 rounded-lg bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500"
                                 />
@@ -112,7 +112,7 @@ export default function Register() {
                             {errors.email && (
                                 <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.email}</p>
                             )}
-                        </div>
+                </div>
 
                         <div>
                             <div className="relative">
@@ -120,10 +120,10 @@ export default function Register() {
                                     <FaLock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    id="password"
-                                    type="password"
-                                    value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                        id="password"
+                        type="password"
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
                                     placeholder="Password"
                                     className="pl-10 w-full px-4 py-2 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 rounded-lg bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500"
                                 />
@@ -131,7 +131,7 @@ export default function Register() {
                             {errors.password && (
                                 <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.password}</p>
                             )}
-                        </div>
+                </div>
 
                         <div>
                             <div className="relative">
@@ -139,10 +139,10 @@ export default function Register() {
                                     <FaLock className="h-5 w-5 text-gray-400" />
                                 </div>
                                 <input
-                                    id="password_confirmation"
-                                    type="password"
-                                    value={data.password_confirmation}
-                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                        id="password_confirmation"
+                        type="password"
+                        value={data.password_confirmation}
+                        onChange={(e) => setData('password_confirmation', e.target.value)}
                                     placeholder="Confirm password"
                                     className="pl-10 w-full px-4 py-2 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20 rounded-lg bg-white dark:bg-gray-700 placeholder-gray-400 dark:placeholder-gray-500"
                                 />
@@ -163,7 +163,7 @@ export default function Register() {
                                     Privacy Policy
                                 </a>
                             </p>
-                        </div>
+                </div>
 
                         <button
                             type="submit"
