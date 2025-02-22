@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
@@ -8,7 +8,7 @@ import SearchBar from '@/Components/Notes/SearchBar';
 import { IoRefresh, IoSettingsOutline } from 'react-icons/io5';
 import axios from 'axios';
 import NoteModal from '@/Components/Notes/NoteModal';
-import { FaMoon, FaSun, FaTh, FaThList, FaUserCircle, FaTachometerAlt, FaShareAlt, FaSignOutAlt } from 'react-icons/fa';
+import { FaMoon, FaSun, FaTh, FaThList, FaUserCircle, FaTachometerAlt, FaShareAlt, FaSignOutAlt, FaFileAlt, FaTimes, FaBars } from 'react-icons/fa';
 import { useDarkMode } from '@/Contexts/DarkModeContext';
 
 export default function Authenticated({ user, children, searchQuery, setSearchQuery, viewMode, setViewMode }) {
@@ -17,28 +17,22 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
     const [note, setNote] = useState(null);
     const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
     const { isDarkMode, toggleDarkMode } = useDarkMode();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const sidebarRef = useRef(null);
 
-    const handleColorChange = async (colorId) => {
-        try {
-            const response = await axios.patch(`/notes/${note.id}`, {
-                color_id: colorId
-            });
-            setNote(response.data);
-        } catch (error) {
-            console.error('Error updating note color:', error);
+    // Close sidebar when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+                setIsSidebarOpen(false);
+            }
         }
-    };
 
-    const handlePinToggle = async () => {
-        try {
-            const response = await axios.patch(`/notes/${note.id}`, {
-                is_pinned: !note.is_pinned
-            });
-            setNote(response.data);
-        } catch (error) {
-            console.error('Error toggling pin:', error);
-        }
-    };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const toggleView = () => {
         setViewMode(viewMode === 'grid' ? 'list' : 'grid');
@@ -46,13 +40,15 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
 
     return (
         <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+            {/* Header */}
             <nav className="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                            <Link href="/" className="flex items-center space-x-2">
+                        <div className="flex items-center">
+                            {/* Add left padding to the logo to make space for menu icon */}
+                            <Link href="/" className="flex items-center space-x-2 pl-12">
                                 <ApplicationLogo className="h-9 w-auto fill-current text-gray-800 dark:text-white" />
-                                <span className="text-xl font-semibold text-gray-800 dark:text-white">Keep</span>
+                                <span className="text-xl font-semibold text-gray-800 dark:text-white">Raabta</span>
                             </Link>
                         </div>
 
@@ -80,132 +76,26 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
                             <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
                                 <IoRefresh className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                             </button>
-                            
-                            {/* Settings Dropdown */}
-                            <div className="relative">
-                                <button 
-                                    onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-transform duration-200 hover:scale-110"
-                                >
-                                    <IoSettingsOutline className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                                </button>
 
-                                {showSettingsDropdown && (
-                                    <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg py-2 z-50">
-                                        <div className="px-4 py-2">
-                                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Settings</p>
-                                            <button
-                                                onClick={() => {
-                                                    toggleDarkMode();
-                                                    setShowSettingsDropdown(false);
-                                                }}
-                                                className="flex items-center space-x-2 w-full p-2 mt-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                                            >
-                                                {isDarkMode ? (
-                                                    <>
-                                                        <FaSun className="h-5 w-5 text-yellow-500" />
-                                                        <span className="text-gray-600 dark:text-gray-300">Light Mode</span>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <FaMoon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
-                                                        <span className="text-gray-600 dark:text-gray-300">Dark Mode</span>
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </div>
+                            {/* Dark Mode Toggle */}
+                            <button
+                                onClick={toggleDarkMode}
+                                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                            >
+                                {isDarkMode ? (
+                                    <FaSun className="h-5 w-5 text-gray-600 dark:text-gray-300" />
+                                ) : (
+                                    <FaMoon className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                                 )}
-                            </div>
-
-                            <div className="hidden sm:flex sm:items-center sm:ml-6">
-                                <div className="ml-3 relative">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 hover:rotate-3">
-                                            {user.profile_photo_url ? (
-                                                <img
-                                                    src={user.profile_photo_url}
-                                                    alt={user.name}
-                                                    className="h-full w-full rounded-full object-cover"
-                                                />
-                                            ) : (
-                                                    <span className="text-lg font-medium text-white">
-                                                    {user.name.charAt(0).toUpperCase()}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </Dropdown.Trigger>
-
-                                        <Dropdown.Content width="w-72" contentClasses="py-3 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
-                                            {/* User Info */}
-                                            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center">
-                                                        <span className="text-xl font-medium text-white">
-                                                            {user.name.charAt(0).toUpperCase()}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                                                            {user.name}
-                                                        </p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                                                            {user.email}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Menu Items */}
-                                            <div className="px-2 py-2">
-                                                <Link
-                                                    href={route('dashboard')}
-                                                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
-                                                >
-                                                    <FaTachometerAlt className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                                    <span className="text-sm">Dashboard</span>
-                                                </Link>
-
-                                                <Link
-                                                    href={route('profile.edit')}
-                                                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
-                                                >
-                                                    <FaUserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                                    <span className="text-sm">Profile</span>
-                                                </Link>
-
-                                                <Link
-                                                    href={route('socials')}
-                                                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
-                                                >
-                                                    <FaShareAlt className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                                                    <span className="text-sm">Social Links</span>
-                                                </Link>
-                                            </div>
-
-                                            {/* Logout Section */}
-                                            <div className="px-2 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
-                                                <Link
-                                                    href={route('logout')}
-                                                    method="post"
-                                                    as="button"
-                                                    className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group"
-                                                >
-                                                    <FaSignOutAlt className="w-5 h-5" />
-                                                    <span className="text-sm">Sign Out</span>
-                                                </Link>
-                                        </div>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                                </div>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 </div>
             </nav>
 
-            <main className="py-6 dark:bg-gray-900">{children}</main>
+            <main className="py-6 dark:bg-gray-900">
+                {children}
+            </main>
 
             {showModal && (
                 <NoteModal
@@ -214,6 +104,205 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
                     onUpdate={setNote}
                 />
             )}
+
+            {/* Mobile Menu Overlay */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            {/* Mobile Menu */}
+            <div 
+                className={`
+                    fixed inset-y-0 left-0 
+                    w-64 bg-white dark:bg-gray-800 
+                    transform transition-transform duration-300 ease-in-out 
+                    shadow-2xl z-50 lg:hidden
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                `}
+            >
+                {/* Menu Header */}
+                <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center space-x-3">
+                        <ApplicationLogo className="h-8 w-auto" />
+                        <span className="text-xl font-semibold text-gray-900 dark:text-white">
+                            Raabta
+                        </span>
+                    </div>
+                </div>
+
+                {/* Menu Items */}
+                <nav className="p-4 space-y-2">
+                    {[
+                        { 
+                            name: 'Notes', 
+                            icon: <FaFileAlt className="w-5 h-5" />,
+                            route: route('dashboard'),
+                            description: 'Manage your notes and documents'
+                        },
+                        { 
+                            name: 'Socials', 
+                            icon: <FaShareAlt className="w-5 h-5" />,
+                            route: route('socials'),
+                            description: 'Connect and share with others'
+                        },
+                        { 
+                            name: 'Profile', 
+                            icon: <FaUserCircle className="w-5 h-5" />,
+                            route: route('profile.edit'),
+                            description: 'View and edit your profile'
+                        },
+                    ].map((item) => (
+                        <Link
+                            key={item.name}
+                            href={item.route}
+                            className={`
+                                flex items-center space-x-3 p-3 rounded-xl
+                                transition-all duration-200
+                                ${route().current(item.route === '/' ? 'dashboard' : item.name.toLowerCase())
+                                    ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                                    : 'hover:bg-gray-50 dark:hover:bg-gray-700/30 text-gray-700 dark:text-gray-300'
+                                }
+                            `}
+                            onClick={() => setIsSidebarOpen(false)}
+                        >
+                            <div className="flex-shrink-0 p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                {item.icon}
+                            </div>
+                            <div>
+                                <div className="font-medium">{item.name}</div>
+                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                    {item.description}
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </nav>
+
+                {/* Bottom Section */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
+                    <Link
+                        href={route('logout')} 
+                        method="post" 
+                        as="button"
+                        className="
+                            flex items-center space-x-3 p-3 rounded-xl w-full
+                            text-red-600 dark:text-red-400 
+                            hover:bg-red-50 dark:hover:bg-red-900/20
+                            transition-all duration-200
+                        "
+                    >
+                        <div className="flex-shrink-0 p-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                            <FaSignOutAlt className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <div className="font-medium">Sign Out</div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                                Log out of your account
+                            </div>
+                        </div>
+                    </Link>
+                </div>
+            </div>
+
+            {/* Desktop Sidebar - Keep your existing sidebar code for desktop */}
+            <div className="hidden lg:block">
+                <div 
+                    ref={sidebarRef}
+                    className={`
+                        fixed top-0 left-0 h-full
+                        transition-all duration-300 ease-in-out z-40
+                        ${isSidebarOpen ? 'w-56 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm' : 'w-14 bg-transparent'}
+                        pt-16
+                    `}
+                >
+                    <div className="flex flex-col h-full justify-between">
+                        <nav className="px-1 py-3">
+                            {[
+                                { 
+                                    name: 'Notes', 
+                                    icon: <FaFileAlt className="w-5 h-5" />,
+                                    route: route('dashboard'),
+                                    description: 'Manage your notes and documents'
+                                },
+                                { 
+                                    name: 'Socials', 
+                                    icon: <FaShareAlt className="w-5 h-5" />,
+                                    route: route('socials'),
+                                    description: 'Connect and share with others'
+                                },
+                                { 
+                                    name: 'Profile', 
+                                    icon: <FaUserCircle className="w-5 h-5" />,
+                                    route: route('profile.edit'),
+                                    description: 'View and edit your profile'
+                                },
+                            ].map((item) => (
+                                <Link
+                                    key={item.name}
+                                    href={item.route}
+                                    className={`
+                                        flex items-center ${isSidebarOpen ? 'justify-start' : 'justify-center'}
+                                        px-3 py-2 text-sm font-medium rounded-lg
+                                        transition-colors duration-200 group
+                                        ${route().current(item.route === '/' ? 'dashboard' : item.name.toLowerCase())
+                                            ? 'text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20'
+                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/20'
+                                        }
+                                    `}
+                                >
+                                    <div className={isSidebarOpen ? "flex-shrink-0" : "flex items-center justify-center"}>
+                                        {item.icon}
+                                    </div>
+                                    {isSidebarOpen && (
+                                        <span className="ml-3 transition-all duration-200">
+                                            {item.name}
+                                        </span>
+                                    )}
+                                </Link>
+                            ))}
+                        </nav>
+
+                        {/* Sign Out Button - Only show when menu is open */}
+                        {isSidebarOpen && (
+                            <div className="px-2 py-3 mt-auto">
+                                <Link
+                                    href={route('logout')} 
+                                    method="post" 
+                                    as="button"
+                                    className={`
+                                        flex items-center justify-start
+                                        px-3 py-2 text-sm font-medium rounded-lg w-full
+                                        transition-colors duration-200 group
+                                        text-red-600 dark:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20
+                                    `}
+                                >
+                                    <div className="flex-shrink-0">
+                                        <FaSignOutAlt className="w-5 h-5" />
+                                    </div>
+                                    <span className="ml-3 transition-all duration-200">
+                                        Sign Out
+                                    </span>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Menu Icon - Single instance */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="fixed top-4 left-4 z-50 p-2 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-700/50 transition-colors"
+            >
+                {isSidebarOpen ? (
+                    <FaTimes className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                ) : (
+                    <FaBars className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+                )}
+            </button>
         </div>
     );
 }

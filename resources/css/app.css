@@ -200,3 +200,84 @@
 .avatar-upload-hover:hover {
     background-color: rgba(0, 0, 0, 0.6);
 }
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.3));
+    border-radius: 100px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, transparent, rgba(20, 184, 166, 0.7)); /* Teal-500 with transparency */
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.3));
+    border-radius: 100px;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, transparent, rgba(45, 212, 191, 0.7)); /* Teal-400 with transparency */
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.3) transparent;
+}
+
+.dark * {
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+}
+
+/* Add hover states for Firefox */
+*:hover {
+    scrollbar-color: rgb(20, 184, 166) transparent;
+}
+
+.dark *:hover {
+    scrollbar-color: rgb(45, 212, 191) transparent;
+}
+
+/* Mobile Menu Animation */
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.menu-enter {
+    animation: slideIn 0.3s ease-out;
+}
+
+.overlay-enter {
+    animation: fadeIn 0.3s ease-out;
+}
