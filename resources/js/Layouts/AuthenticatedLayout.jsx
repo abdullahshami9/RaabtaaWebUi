@@ -8,7 +8,7 @@ import SearchBar from '@/Components/Notes/SearchBar';
 import { IoRefresh, IoSettingsOutline } from 'react-icons/io5';
 import axios from 'axios';
 import NoteModal from '@/Components/Notes/NoteModal';
-import { FaMoon, FaSun, FaTh, FaThList } from 'react-icons/fa';
+import { FaMoon, FaSun, FaTh, FaThList, FaUserCircle, FaTachometerAlt, FaShareAlt, FaSignOutAlt } from 'react-icons/fa';
 import { useDarkMode } from '@/Contexts/DarkModeContext';
 
 export default function Authenticated({ user, children, searchQuery, setSearchQuery, viewMode, setViewMode }) {
@@ -85,7 +85,7 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
                             <div className="relative">
                                 <button 
                                     onClick={() => setShowSettingsDropdown(!showSettingsDropdown)}
-                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+                                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-transform duration-200 hover:scale-110"
                                 >
                                     <IoSettingsOutline className="h-5 w-5 text-gray-600 dark:text-gray-300" />
                                 </button>
@@ -118,10 +118,11 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
                                 )}
                             </div>
 
-                            <div className="relative">
+                            <div className="hidden sm:flex sm:items-center sm:ml-6">
+                                <div className="ml-3 relative">
                                 <Dropdown>
                                     <Dropdown.Trigger>
-                                        <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                                            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-105 hover:rotate-3">
                                             {user.profile_photo_url ? (
                                                 <img
                                                     src={user.profile_photo_url}
@@ -129,23 +130,75 @@ export default function Authenticated({ user, children, searchQuery, setSearchQu
                                                     className="h-full w-full rounded-full object-cover"
                                                 />
                                             ) : (
-                                                <span className="text-lg font-medium text-gray-600 dark:text-gray-300">
+                                                    <span className="text-lg font-medium text-white">
                                                     {user.name.charAt(0).toUpperCase()}
                                                 </span>
                                             )}
                                         </div>
                                     </Dropdown.Trigger>
-                                    <Dropdown.Content>
-                                        <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700">
-                                            <p className="text-sm font-medium text-gray-800 dark:text-white">{user.name}</p>
+
+                                        <Dropdown.Content width="w-72" contentClasses="py-3 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700">
+                                            {/* User Info */}
+                                            <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                                                <div className="flex items-center space-x-3">
+                                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center">
+                                                        <span className="text-xl font-medium text-white">
+                                                            {user.name.charAt(0).toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                                            {user.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                                                            {user.email}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Menu Items */}
+                                            <div className="px-2 py-2">
+                                                <Link
+                                                    href={route('dashboard')}
+                                                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
+                                                >
+                                                    <FaTachometerAlt className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                                    <span className="text-sm">Dashboard</span>
+                                                </Link>
+
+                                                <Link
+                                                    href={route('profile.edit')}
+                                                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
+                                                >
+                                                    <FaUserCircle className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                                    <span className="text-sm">Profile</span>
+                                                </Link>
+
+                                                <Link
+                                                    href={route('socials')}
+                                                    className="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group"
+                                                >
+                                                    <FaShareAlt className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                                                    <span className="text-sm">Social Links</span>
+                                                </Link>
+                                            </div>
+
+                                            {/* Logout Section */}
+                                            <div className="px-2 pt-2 pb-1 border-t border-gray-100 dark:border-gray-700">
+                                                <Link
+                                                    href={route('logout')}
+                                                    method="post"
+                                                    as="button"
+                                                    className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors group"
+                                                >
+                                                    <FaSignOutAlt className="w-5 h-5" />
+                                                    <span className="text-sm">Sign Out</span>
+                                                </Link>
                                         </div>
-                                        <Dropdown.Link href={route('dashboard')}>Dashboard</Dropdown.Link>
-                                        <Dropdown.Link href={route('profile.edit')}>Profile</Dropdown.Link>
-                                        <Dropdown.Link href={route('logout')} method="post" as="button">
-                                            Log Out
-                                        </Dropdown.Link>
                                     </Dropdown.Content>
                                 </Dropdown>
+                                </div>
                             </div>
                         </div>
                     </div>

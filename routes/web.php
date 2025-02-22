@@ -5,6 +5,7 @@ use App\Http\Controllers\NotesController;
 use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\SocialLinkController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -46,6 +47,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Colors
     Route::get('/colors', [ColorController::class, 'index']);
+    
+    // Social Links
+    Route::get('/socials', [SocialLinkController::class, 'showPage'])->name('socials');
+    Route::get('/social-links', [SocialLinkController::class, 'index']);
+    Route::post('/social-links', [SocialLinkController::class, 'store']);
+    Route::patch('/social-links/{socialLink}', [SocialLinkController::class, 'update']);
+    Route::delete('/social-links/{socialLink}', [SocialLinkController::class, 'destroy']);
+    Route::post('/social-links/reorder', [SocialLinkController::class, 'reorder']);
 });
 
 Route::middleware(['auth'])->group(function () {

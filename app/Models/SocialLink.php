@@ -12,7 +12,8 @@ class SocialLink extends Model
     protected $fillable = [
         'user_id',
         'platform',
-        'url'
+        'url',
+        'order'
     ];
 
     public function user()
