@@ -9,25 +9,33 @@ const Note = ({ note, onUpdate, onDelete, colors }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [showHoverActions, setShowHoverActions] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
+    const [isPinned, setIsPinned] = useState(note.is_pinned);
 
     const {
         attributes,
-        listeners,
+        listeners: dndListeners,
         setNodeRef,
         transform,
         transition,
-    } = useSortable({ id: note.id });
+    } = useSortable({ 
+        id: note.id,
+        disabled: showColorPicker
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
+        backgroundColor: note.color?.value || 'white',
     };
 
     const handleColorChange = async (colorId, e) => {
-        e.stopPropagation(); // Prevent modal from opening
+        e.stopPropagation();
         try {
             const response = await axios.patch(`/notes/${note.id}`, {
-                color_id: colorId
+                color_id: colorId,
+                title: note.title || null,
+                content: note.content,
+                is_pinned: isPinned
             });
             onUpdate(response.data);
             setShowColorPicker(false);
@@ -37,19 +45,36 @@ const Note = ({ note, onUpdate, onDelete, colors }) => {
     };
 
     const handlePin = async (e) => {
-        e.stopPropagation(); // Prevent modal from opening
+        e.stopPropagation();
+        e.preventDefault();
+        
         try {
+            const newPinnedState = !isPinned;
+            setIsPinned(newPinnedState);
+            
             const response = await axios.patch(`/notes/${note.id}`, {
-                is_pinned: !note.is_pinned
+                is_pinned: newPinnedState,
+                title: note.title || null,
+                content: note.content,
+                color_id: note.color?.id || null
             });
             onUpdate(response.data);
         } catch (error) {
             console.error('Error toggling pin:', error);
+            setIsPinned(!newPinnedState); // Revert on error
         }
     };
 
-    const handleNoteClick = () => {
+    const handleNoteClick = (e) => {
+        if (e.target.closest('.note-actions')) {
+            return;
+        }
         setIsModalOpen(true);
+    };
+
+    const getTextColor = () => {
+        if (!note.color?.value) return 'text-gray-600';
+        return 'text-gray-800';
     };
 
     return (
@@ -58,8 +83,7 @@ const Note = ({ note, onUpdate, onDelete, colors }) => {
                 ref={setNodeRef}
                 style={style}
                 {...attributes}
-                {...listeners}
-                className={`group relative rounded-lg shadow-md p-4 hover:shadow-lg transition-all cursor-pointer ${note.color ? `bg-${note.color.name}-100` : 'bg-white'}`}
+                className={`group relative rounded-lg shadow-md p-4 hover:shadow-lg transition-all cursor-pointer`}
                 onClick={handleNoteClick}
                 onMouseEnter={() => setShowHoverActions(true)}
                 onMouseLeave={() => {
@@ -67,17 +91,28 @@ const Note = ({ note, onUpdate, onDelete, colors }) => {
                     setShowColorPicker(false);
                 }}
             >
-                {/* Pin and Color Actions */}
+                <div 
+                    className="absolute top-1/2 left-0 w-6 h-12 -translate-y-1/2 opacity-0 group-hover:opacity-100 cursor-move"
+                    {...dndListeners}
+                >
+                    <div className="w-1 h-6 bg-gray-300 rounded-full mx-auto my-1" />
+                    <div className="w-1 h-6 bg-gray-300 rounded-full mx-auto my-1" />
+                </div>
+
                 {showHoverActions && (
-                    <div className="absolute top-2 right-2 flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg p-1 z-10">
+                    <div className="note-actions absolute top-2 right-2 flex items-center gap-2 bg-white/80 backdrop-blur-sm rounded-lg p-1 z-10">
                         <button
+                            type="button"
                             onClick={handlePin}
-                            className="p-1.5 hover:bg-black/10 rounded-full transition-colors"
-                            title={note.is_pinned ? "Unpin note" : "Pin note"}
+                            className={`p-1.5 hover:bg-black/10 rounded-full transition-colors ${
+                                isPinned ? 'bg-yellow-50' : ''
+                            }`}
+                            title={isPinned ? "Unpin note" : "Pin note"}
                         >
                             <FaThumbtack 
-                                className={`h-3.5 w-3.5 ${note.is_pinned ? 'text-yellow-600' : 'text-gray-600'}`}
-                                style={{ transform: note.is_pinned ? 'rotate(45deg)' : 'none' }}
+                                className={`h-3.5 w-3.5 transform transition-transform ${
+                                    isPinned ? 'text-yellow-600 rotate-45' : 'text-gray-600'
+                                }`}
                             />
                         </button>
                         <div className="relative">
@@ -111,17 +146,24 @@ const Note = ({ note, onUpdate, onDelete, colors }) => {
                     </div>
                 )}
 
-                {/* Note Content */}
-                {note.title && <h3 className="text-lg font-medium mb-2">{note.title}</h3>}
-                <p className="text-gray-600">{note.content}</p>
+                <div className="note-content pl-6">
+                    {note.title && (
+                        <h3 className={`text-lg font-medium mb-2 ${getTextColor()}`}>
+                            {note.title}
+                        </h3>
+                    )}
+                    <p className={getTextColor()}>{note.content}</p>
+                </div>
             </div>
 
-            {/* Note Modal */}
             {isModalOpen && (
                 <NoteModal
-                    note={note}
+                    note={{...note, is_pinned: isPinned}}
                     onClose={() => setIsModalOpen(false)}
-                    onUpdate={onUpdate}
+                    onUpdate={(updatedNote) => {
+                        setIsPinned(updatedNote.is_pinned);
+                        onUpdate(updatedNote);
+                    }}
                     onDelete={onDelete}
                     colors={colors}
                 />

@@ -6,6 +6,8 @@ namespace App\Providers;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use App\Models\Note;
 use App\Policies\NotePolicy;
+use App\Models\SocialLink;
+use App\Policies\SocialLinkPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         Note::class => NotePolicy::class,
+        SocialLink::class => SocialLinkPolicy::class,
     ];
 
     /**

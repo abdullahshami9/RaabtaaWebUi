@@ -8,6 +8,7 @@ const NoteModal = ({ note, onClose, onUpdate, onDelete, colors }) => {
     const [isSaving, setIsSaving] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
+    const [isPinned, setIsPinned] = useState(note.is_pinned);
 
     const handleSubmit = async () => {
         if (!content.trim() && !title.trim()) {
@@ -20,6 +21,8 @@ const NoteModal = ({ note, onClose, onUpdate, onDelete, colors }) => {
             const response = await axios.patch(`/notes/${note.id}`, {
                 title: title.trim() || null,
                 content: content.trim(),
+                is_pinned: isPinned,
+                color_id: note.color?.id || null
             });
             onUpdate(response.data);
             setShowSuccess(true);
@@ -35,12 +38,33 @@ const NoteModal = ({ note, onClose, onUpdate, onDelete, colors }) => {
     const handleColorChange = async (colorId) => {
         try {
             const response = await axios.patch(`/notes/${note.id}`, {
-                color_id: colorId
+                color_id: colorId,
+                title: title.trim() || null,
+                content: content.trim(),
+                is_pinned: isPinned
             });
             onUpdate(response.data);
             setShowColorPicker(false);
         } catch (error) {
             console.error('Error updating note color:', error);
+        }
+    };
+
+    const handlePinToggle = async () => {
+        try {
+            const newPinnedState = !isPinned;
+            setIsPinned(newPinnedState);
+            
+            const response = await axios.patch(`/notes/${note.id}`, {
+                is_pinned: newPinnedState,
+                title: title.trim() || null,
+                content: content.trim(),
+                color_id: note.color?.id || null
+            });
+            onUpdate(response.data);
+        } catch (error) {
+            console.error('Error toggling pin:', error);
+            setIsPinned(!newPinnedState);
         }
     };
 
@@ -76,14 +100,22 @@ const NoteModal = ({ note, onClose, onUpdate, onDelete, colors }) => {
                     <div className="flex items-center justify-between">
                         {/* Left Actions */}
                         <div className="flex items-center space-x-2">
-                            <button className="tool-button" title="Pin note">
-                                <FaThumbtack className={`w-4 h-4 ${note.is_pinned ? 'text-yellow-500' : 'text-gray-500'}`} />
+                            <button 
+                                className={`tool-button ${isPinned ? 'bg-yellow-50' : ''}`}
+                                onClick={handlePinToggle}
+                                title={isPinned ? "Unpin note" : "Pin note"}
+                            >
+                                <FaThumbtack 
+                                    className={`w-4 h-4 transform transition-transform ${
+                                        isPinned ? 'text-yellow-600 rotate-45' : 'text-gray-500'
+                                    }`}
+                                />
                             </button>
                             <button className="tool-button" title="Add image">
                                 <FaImage className="w-4 h-4 text-gray-500" />
                             </button>
                             <div className="relative">
-                                <button 
+                                <button
                                     className="tool-button"
                                     onClick={() => setShowColorPicker(!showColorPicker)}
                                     title="Change color"
