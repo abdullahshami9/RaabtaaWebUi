@@ -45,6 +45,9 @@ class SurveyController extends Controller
 
             if ($validatedData['usage_type'] === 'business') {
                 $request->validate([
+                    'business_info.business_name' => 'required|string|max:255',
+                    'business_info.parent_industry_id' => 'required|exists:parent_industries,id',
+                    'business_info.child_industry_id' => 'required|exists:child_industries,id',
                     'payment.card_holder_name' => 'required|string|max:255',
                     'payment.card_number' => 'required|digits:16',
                     'payment.expiry_date' => ['required', 'regex:/^(0[1-9]|1[0-2])\/\d{2}$/'],
@@ -75,8 +78,18 @@ class SurveyController extends Controller
                 }
             }
 
-            // Handle business payment
+            // Handle business info
             if ($validatedData['usage_type'] === 'business') {
+                $user->userIndustry()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'business_name' => $request->input('business_info.business_name'),
+                        'parent_industry_id' => $request->input('business_info.parent_industry_id'),
+                        'child_industry_id' => $request->input('business_info.child_industry_id')
+                    ]
+                );
+
+                // Handle payment
                 $user->payments()->updateOrCreate(
                     ['user_id' => $user->id],
                     $request->input('payment')

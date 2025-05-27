@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState} from 'react';
 import { Head } from '@inertiajs/react';
 import { FaBriefcase, FaUser, FaLink, FaSave, FaGithub, FaLinkedin, FaTwitter, FaInstagram, FaTiktok, FaFacebook, FaYoutube, FaGlobe, FaCheck, FaTimes, FaIndustry, FaCreditCard, FaArrowRight } from 'react-icons/fa';
 import axios from 'axios';
@@ -87,50 +87,75 @@ const navigationButtonStyles = {
     }
 };
 
-const industries = [
-    {
-        parent: 'Technology',
-        sub: ['Software Development', 'Hardware Manufacturing', 'IT Services', 'Telecommunications']
-    },
-    {
-        parent: 'Healthcare',
-        sub: ['Hospitals', 'Pharmaceuticals', 'Medical Devices', 'Health Insurance']
-    },
-    {
-        parent: 'Finance',
-        sub: ['Banking', 'Insurance', 'Investment', 'Fintech']
-    },
-    {
-        parent: 'Retail',
-        sub: ['E-commerce', 'Brick & Mortar', 'Wholesale', 'Luxury Goods']
-    },
-    {
-        parent: 'Education',
-        sub: ['Schools', 'Universities', 'Online Learning', 'Educational Technology']
-    },
-    {
-        parent: 'Manufacturing',
-        sub: ['Automotive', 'Electronics', 'Textiles', 'Heavy Machinery']
-    },
-    {
-        parent: 'Hospitality',
-        sub: ['Hotels', 'Restaurants', 'Travel', 'Tourism']
-    },
-    {
-        parent: 'Real Estate',
-        sub: ['Residential', 'Commercial', 'Property Management', 'Construction']
-    },
-    {
-        parent: 'Entertainment',
-        sub: ['Film & TV', 'Music', 'Gaming', 'Live Events']
-    },
-    {
-        parent: 'Other',
-        sub: []
-    }
-];
+
+
+
 
 export default function Survey({ auth }) {
+    const [industries, setIndustries] = useState([]);
+
+    useEffect(() => {  // Now useEffect is properly inside a component
+        axios.get('/api/industries')
+        .then(response => {
+            // console.log('API Response:', response.data);
+            const transformedIndustries = response.data.industries.map(industry => ({
+                id: industry.id, // Add parent industry ID
+                name: industry.name,
+                children: industry.children.map(child => ({
+                    id: child.id, // Add child industry ID
+                    name: child.name
+                }))
+            }));
+            setIndustries(transformedIndustries);
+        })
+        .catch(error => {
+            console.error('API Error:', error);
+            setIndustries([
+                        {
+                            parent: 'Technology',
+                            sub: ['Software Development', 'Hardware Manufacturing', 'IT Services', 'Telecommunications']
+                        },
+                        {
+                            parent: 'Healthcare',
+                            sub: ['Hospitals', 'Pharmaceuticals', 'Medical Devices', 'Health Insurance']
+                        },
+                        {
+                            parent: 'Finance',
+                            sub: ['Banking', 'Insurance', 'Investment', 'Fintech']
+                        },
+                        {
+                            parent: 'Retail',
+                            sub: ['E-commerce', 'Brick & Mortar', 'Wholesale', 'Luxury Goods']
+                        },
+                        {
+                            parent: 'Education',
+                            sub: ['Schools', 'Universities', 'Online Learning', 'Educational Technology']
+                        },
+                        {
+                            parent: 'Manufacturing',
+                            sub: ['Automotive', 'Electronics', 'Textiles', 'Heavy Machinery']
+                        },
+                        {
+                            parent: 'Hospitality',
+                            sub: ['Hotels', 'Restaurants', 'Travel', 'Tourism']
+                        },
+                        {
+                            parent: 'Real Estate',
+                            sub: ['Residential', 'Commercial', 'Property Management', 'Construction']
+                        },
+                        {
+                            parent: 'Entertainment',
+                            sub: ['Film & TV', 'Music', 'Gaming', 'Live Events']
+                        },
+                        {
+                            parent: 'Other',
+                            sub: []
+                        }
+                    ]);
+                });
+            }, []);  // Empty dependency array to run only once
+
+
     const [step, setStep] = useState(1);
     const [isBusiness, setIsBusiness] = useState(false);
     const [error, setError] = useState(null);
@@ -143,6 +168,8 @@ export default function Survey({ auth }) {
         },
         business_info: {
             brand_name: '',
+            parent_industry_id: '', // Store ID instead of name
+            child_industry_id: '',  // Store ID instead of name
             parent_industry: '',
             sub_industry: '',
             is_brand_name_valid: false
@@ -322,7 +349,6 @@ export default function Survey({ auth }) {
         try {
             setIsSubmitting(true);
             
-            // Format social links with platform prefixes
             const formattedLinks = formData.selected_platforms.reduce((acc, platform) => {
                 const prefix = socialPlatforms[platform].prefix;
                 const username = formData.social_links[platform]?.trim() || '';
@@ -332,11 +358,21 @@ export default function Survey({ auth }) {
                 };
             }, {});
 
-            const response = await axios.post(route('survey.store'), {
-                usage_type: 'personal',
+            const payload = {
+                usage_type: formData.usage_type,
                 selected_platforms: formData.selected_platforms,
                 social_links: formattedLinks
-            });
+            };
+
+            if (formData.usage_type === 'business') {
+                payload.business_info = {
+                    business_name: formData.business_info.brand_name,
+                    parent_industry_id: formData.business_info.parent_industry_id,
+                    child_industry_id: formData.business_info.child_industry_id
+                };
+            }
+
+            const response = await axios.post(route('survey.store'), payload);
 
             if (response.data.redirect) {
                 window.location.href = route('dashboard');
@@ -375,7 +411,6 @@ export default function Survey({ auth }) {
                 return;
             }
 
-            // Format social links and payment data
             const formattedLinks = formData.selected_platforms.reduce((acc, platform) => {
                 const prefix = socialPlatforms[platform].prefix;
                 const username = formData.social_links[platform]?.trim() || '';
@@ -389,6 +424,11 @@ export default function Survey({ auth }) {
                 usage_type: 'business',
                 selected_platforms: formData.selected_platforms,
                 social_links: formattedLinks,
+                business_info: {
+                    business_name: formData.business_info.brand_name,
+                    parent_industry_id: formData.business_info.parent_industry_id,
+                    child_industry_id: formData.business_info.child_industry_id
+                },
                 payment: {
                     card_holder_name: paymentData.cardHolderName,
                     card_number: paymentData.cardNumber.replace(/\s/g, ''),
@@ -651,21 +691,21 @@ export default function Survey({ auth }) {
                                             {/* Parent Industry Dropdown */}
                                             <div className="relative">
                                                 <select
-                                                    value={formData.business_info.parent_industry || ''}
+                                                    value={formData.business_info.parent_industry_id || ''}
                                                     onChange={(e) => setFormData({
                                                         ...formData,
                                                         business_info: {
                                                             ...formData.business_info,
-                                                            parent_industry: e.target.value,
-                                                            sub_industry: '' // Reset sub-industry when parent changes
+                                                            parent_industry_id: e.target.value,
+                                                            child_industry_id: '' // Reset child when parent changes
                                                         }
                                                     })}
                                                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 appearance-none"
                                                 >
                                                     <option value="">Select Parent Industry</option>
                                                     {industries.map((industry) => (
-                                                        <option key={industry.parent} value={industry.parent}>
-                                                            {industry.parent}
+                                                        <option key={industry.id} value={industry.id}>
+                                                            {industry.name}
                                                         </option>
                                                     ))}
                                                 </select>
@@ -675,24 +715,24 @@ export default function Survey({ auth }) {
                                             {/* Sub-Industry Dropdown */}
                                             <div className="relative">
                                                 <select
-                                                    value={formData.business_info.sub_industry || ''}
+                                                    value={formData.business_info.child_industry_id || ''}
                                                     onChange={(e) => setFormData({
                                                         ...formData,
                                                         business_info: {
                                                             ...formData.business_info,
-                                                            sub_industry: e.target.value
+                                                            child_industry_id: e.target.value
                                                         }
                                                     })}
-                                                    disabled={!formData.business_info.parent_industry}
+                                                    disabled={!formData.business_info.parent_industry_id}
                                                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-400 dark:focus:border-blue-400 appearance-none disabled:opacity-50"
                                                 >
                                                     <option value="">Select Sub-Industry</option>
-                                                    {formData.business_info.parent_industry && 
+                                                    {formData.business_info.parent_industry_id && 
                                                         industries
-                                                            .find(i => i.parent === formData.business_info.parent_industry)
-                                                            ?.sub.map((subIndustry) => (
-                                                                <option key={subIndustry} value={subIndustry}>
-                                                                    {subIndustry}
+                                                            .find(i => i.id == formData.business_info.parent_industry_id)
+                                                            ?.children.map((child) => (
+                                                                <option key={child.id} value={child.id}>
+                                                                    {child.name}
                                                                 </option>
                                                             ))
                                                     }
@@ -737,13 +777,13 @@ export default function Survey({ auth }) {
                                         formData.usage_type === 'personal' 
                                             ? !formData.personal_info.is_username_valid
                                             : !formData.business_info.is_brand_name_valid || 
-                                              !formData.business_info.parent_industry
+                                            !formData.business_info.parent_industry_id // Changed from parent_industry to parent_industry_id
                                     }
                                     className={`
                                         ${navigationButtonStyles.base}
                                         ${(formData.usage_type === 'personal' 
                                             ? !formData.personal_info.is_username_valid
-                                            : !formData.business_info.is_brand_name_valid || !formData.business_info.parent_industry)
+                                            : !formData.business_info.is_brand_name_valid || !formData.business_info.parent_industry_id) // Changed here too
                                             ? navigationButtonStyles.disabled
                                             : navigationButtonStyles.enabled.green}
                                         group

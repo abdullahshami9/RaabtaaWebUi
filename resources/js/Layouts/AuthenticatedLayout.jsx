@@ -107,7 +107,7 @@ export default function AuthenticatedLayout({ user, header, children, searchQuer
                 <div className="max-w-7xl mx-auto py-3 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                     <div className="flex items-center">
                         {/* Add left padding to the logo to make space for menu icon */}
-                        <Link href="/" className="flex items-center space-x-2 pl-12">
+                        <Link href="/dashboard" className="flex items-center space-x-2 pl-12">
                             <ApplicationLogo className="h-9 w-auto fill-current text-gray-800 dark:text-white" />
                             <span className="text-xl font-semibold text-gray-800 dark:text-white">Raabta</span>
                         </Link>

@@ -47,6 +47,7 @@ const FriendlyCharacter = ({
   const [hover, setHover] = useState(false);
   const [excited, setExcited] = useState(false);
   const [thinking, setThinking] = useState(false);
+  const [eyebrowState, setEyebrowState] = useState('neutral');
 
   // Random blinking
   useEffect(() => {
@@ -62,7 +63,11 @@ const FriendlyCharacter = ({
   useEffect(() => {
     if (isTyping) {
       setExcited(true);
-      const timer = setTimeout(() => setExcited(false), 2000);
+      setEyebrowState('excited');
+      const timer = setTimeout(() => {
+        setExcited(false);
+        setEyebrowState('neutral');
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [isTyping]);
@@ -71,21 +76,39 @@ const FriendlyCharacter = ({
   useEffect(() => {
     if (focusedField) {
       setThinking(true);
+      setEyebrowState('concerned');
     } else {
       setThinking(false);
+      setEyebrowState('neutral');
     }
   }, [focusedField]);
 
+  // Eyebrow positions based on state
+  const getEyebrowPath = (side) => {
+    if (eyebrowState === 'excited') {
+      return side === 'left' 
+        ? "M 85 50 Q 95 40 105 50" 
+        : "M 115 50 Q 125 40 135 50";
+    } else if (eyebrowState === 'concerned') {
+      return side === 'left' 
+        ? "M 85 55 Q 95 60 105 55" 
+        : "M 115 55 Q 125 60 135 55";
+    } else {
+      return side === 'left' 
+        ? "M 85 52 Q 95 48 105 52" 
+        : "M 115 52 Q 125 48 135 52";
+    }
+  };
+
   return (
     <div 
-      className="relative cursor-pointer ml-8"
+      className="relative cursor-pointer mx-auto w-[220px] h-[220px]"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
       <svg 
         width="220" 
         height="220"
-        style={{ marginLeft: '20%' }} 
         viewBox="0 0 220 220" 
         className="transition-all duration-300"
       >
@@ -101,14 +124,32 @@ const FriendlyCharacter = ({
         {/* Eyes */}
         <g transform="translate(95 60)">
           {/* Left eye */}
-          <circle cx="0" cy="0" r="4" fill="#334155" className="dark:fill-gray-200">
-            {blink && <animate attributeName="ry" values="4;0;4" dur="0.4s" />}
-          </circle>
+          <ellipse 
+            cx="0" 
+            cy="0" 
+            rx="5" 
+            ry={blink ? "0" : "5"} 
+            fill="#334155" 
+            className="dark:fill-gray-200 transition-all duration-200"
+          >
+            {blink && <animate attributeName="ry" values="5;0;5" dur="0.3s" />}
+          </ellipse>
           
           {/* Right eye */}
-          <circle cx="30" cy="0" r="4" fill="#334155" className="dark:fill-gray-200">
-            {blink && <animate attributeName="ry" values="4;0;4" dur="0.4s" />}
-          </circle>
+          <ellipse 
+            cx="30" 
+            cy="0" 
+            rx="5" 
+            ry={blink ? "0" : "5"} 
+            fill="#334155" 
+            className="dark:fill-gray-200 transition-all duration-200"
+          >
+            {blink && <animate attributeName="ry" values="5;0;5" dur="0.3s" />}
+          </ellipse>
+          
+          {/* Eye highlights */}
+          <circle cx="3" cy="-3" r="1.5" fill="white" className="opacity-80" />
+          <circle cx="33" cy="-3" r="1.5" fill="white" className="opacity-80" />
         </g>
         
         {/* Cloth covering eyes when password is shown */}
@@ -130,22 +171,22 @@ const FriendlyCharacter = ({
           </g>
         )}
         
-        {/* Eyebrows - single set (removed the multiple eyebrow effect) */}
+        {/* Eyebrows - dynamic based on state */}
         <path 
-          d="M 90 55 Q 100 50 110 55" 
+          d={getEyebrowPath('left')}
           stroke="#334155" 
-          strokeWidth="2" 
+          strokeWidth="2.5" 
           fill="none"
+          strokeLinecap="round"
           className="dark:stroke-gray-200 transition-all duration-300"
-          transform={(hover || excited) ? "translate(0 -3)" : ""}
         />
         <path 
-          d="M 110 55 Q 120 50 130 55" 
+          d={getEyebrowPath('right')}
           stroke="#334155" 
-          strokeWidth="2" 
+          strokeWidth="2.5" 
           fill="none"
+          strokeLinecap="round"
           className="dark:stroke-gray-200 transition-all duration-300"
-          transform={(hover || excited) ? "translate(0 -3)" : ""}
         />
         
         {/* Mouth - varies based on state */}
@@ -177,7 +218,7 @@ const FriendlyCharacter = ({
           <path 
             d="M 65 110 Q 40 90 30 70" 
             stroke="#e2e8f0" 
-            strokeWidth="4"  // Increased from 3 to 4
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
             className="dark:stroke-gray-600 transition-all duration-500"
@@ -186,7 +227,7 @@ const FriendlyCharacter = ({
           <path 
             d="M 65 110 Q 50 80 80 60" 
             stroke="#e2e8f0" 
-            strokeWidth="4"  // Increased from 3 to 4
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
             className="dark:stroke-gray-600 transition-all duration-500"
@@ -195,7 +236,7 @@ const FriendlyCharacter = ({
           <path 
             d="M 65 110 Q 50 130 40 150" 
             stroke="#e2e8f0" 
-            strokeWidth="4"  // Increased from 3 to 4
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
             className="dark:stroke-gray-600 transition-all duration-500"
@@ -207,7 +248,7 @@ const FriendlyCharacter = ({
           <path 
             d="M 155 110 Q 170 90 180 70" 
             stroke="#e2e8f0" 
-            strokeWidth="4"  // Increased from 3 to 4
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
             className="dark:stroke-gray-600 transition-all duration-500"
@@ -216,7 +257,7 @@ const FriendlyCharacter = ({
           <path 
             d="M 155 110 Q 170 130 180 150" 
             stroke="#e2e8f0" 
-            strokeWidth="4"  // Increased from 3 to 4
+            strokeWidth="4"
             fill="none"
             strokeLinecap="round"
             className="dark:stroke-gray-600 transition-all duration-500"
@@ -309,24 +350,24 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-900 overflow-hidden">
+        <div className="min-h-screen bg-white dark:bg-gray-900 overflow-hidden flex flex-col">
             <Head title="Register - Create Your Account" />
             
-            <div className="flex flex-col lg:flex-row h-full">
+            <div className="flex flex-col lg:flex-row flex-1">
                 {/* Left Side - Hero Section */}
-                <div className="lg:w-1/2 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-8 lg:p-12 order-2 lg:order-1">
-                    <div className="max-w-md text-center space-y-8">
+                <div className="lg:w-1/2 bg-gradient-to-br from-blue-50 via-white to-green-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 flex items-center justify-center p-4 sm:p-8 md:p-12 order-2 lg:order-1">
+                    <div className="max-w-md w-full text-center space-y-6 sm:space-y-8">
                         <FriendlyCharacter 
                             isPasswordVisible={showPassword || showConfirmPassword}
                             focusedField={focusedField}
                             isTyping={isTyping}
                         />
                         
-                        <div className="space-y-4">
-                            <h1 className="text-3xl lg:text-4xl font-normal text-gray-900 dark:text-white">
+                        <div className="space-y-3 sm:space-y-4">
+                            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-normal text-gray-900 dark:text-white">
                                 Welcome to <span className="font-medium text-blue-600 dark:text-blue-400">Raabta</span>
                             </h1>
-                            <p className="text-base lg:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
+                            <p className="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
                                 Create your smart digital identity and transform the way you network professionally.
                             </p>
                         </div>
@@ -342,28 +383,19 @@ export default function Register() {
                 </div>
 
                 {/* Right Side - Registration Form */}
-                <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 order-1 lg:order-2">
-                    <div className="w-full max-w-sm space-y-6 sm:space-y-8">
-                        
+                <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-6 md:p-8 lg:p-12 order-1 lg:order-2">
+                    <div className="w-full max-w-sm space-y-4 sm:space-y-6">
                         {/* Header */}
                         <div className="text-center space-y-2">
-                            <div className="text-2xl font-normal text-gray-900 dark:text-white">Create your account</div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <div className="text-xl sm:text-2xl font-normal text-gray-900 dark:text-white">Create your account</div>
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                                 to continue to Raabta
                             </p>
                         </div>
 
-                        {/* <div className="flex justify-center">
-                            <img
-                                className="h-16 w-auto"
-                                src={raabtaaLogo}
-                                alt="Raabta"
-                            />
-                        </div> */}
-
-                        <form onSubmit={submit} className="space-y-4 sm:space-y-6">
+                        <form onSubmit={submit} className="space-y-3 sm:space-y-4">
                             {/* Name Field */}
-                            <div className="space-y-2">
+                            <div className="space-y-1 sm:space-y-2">
                                 <div className="relative">
                                     <input
                                         id="name"
@@ -374,22 +406,22 @@ export default function Register() {
                                         onFocus={() => setFocusedField('name')}
                                         onBlur={() => setFocusedField(null)}
                                         placeholder=" "
-                                        className="peer w-full px-3 py-3 sm:py-4 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800"
+                                        className="peer w-full px-3 py-2 sm:py-3 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800"
                                     />
                                     <label 
                                         htmlFor="name"
-                                        className="absolute left-3 -top-2.5 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
+                                        className="absolute left-3 -top-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
                                     >
                                         Full name
                                     </label>
                                 </div>
                                 {errors.name && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">{errors.name}</p>
+                                    <p className="text-xs sm:text-sm text-red-600 dark:text-red-400">{errors.name}</p>
                                 )}
                             </div>
 
                             {/* Email Field */}
-                            <div className="space-y-2">
+                            <div className="space-y-1 sm:space-y-2">
                                 <div className="relative">
                                     <input
                                         id="email"
@@ -399,23 +431,23 @@ export default function Register() {
                                         onFocus={() => setFocusedField('email')}
                                         onBlur={() => setFocusedField(null)}
                                         placeholder=" "
-                                        className="peer w-full px-3 py-3 sm:py-4 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800"
+                                        className="peer w-full px-3 py-2 sm:py-3 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800"
                                     />
                                     <label 
                                         htmlFor="email"
-                                        className="absolute left-3 -top-2.5 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
+                                        className="absolute left-3 -top-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
                                     >
                                         Email
                                     </label>
                                 </div>
                                 {errors.email && (
-                                    <p className="text-sm text-red-600 dark:text-red-400">{errors.email}</p>
+                                    <p className="text-xs sm:text-sm text-red-600 dark:text-red-400">{errors.email}</p>
                                 )}
                             </div>
 
                             {/* Password Fields */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="space-y-1 sm:space-y-2">
                                     <div className="relative">
                                         <input
                                             id="password"
@@ -425,11 +457,11 @@ export default function Register() {
                                             onFocus={() => setFocusedField('password')}
                                             onBlur={() => setFocusedField(null)}
                                             placeholder=" "
-                                            className="peer w-full px-3 py-3 sm:py-4 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800 pr-10"
+                                            className="peer w-full px-3 py-2 sm:py-3 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800 pr-10"
                                         />
                                         <label 
                                             htmlFor="password"
-                                            className="absolute left-3 -top-2.5 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
+                                            className="absolute left-3 -top-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
                                         >
                                             Password
                                         </label>
@@ -438,15 +470,15 @@ export default function Register() {
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                             onClick={() => setShowPassword(!showPassword)}
                                         >
-                                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                            {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                                         </button>
                                     </div>
                                     {errors.password && (
-                                        <p className="text-sm text-red-600 dark:text-red-400">{errors.password}</p>
+                                        <p className="text-xs sm:text-sm text-red-600 dark:text-red-400">{errors.password}</p>
                                     )}
                                 </div>
 
-                                <div className="space-y-2">
+                                <div className="space-y-1 sm:space-y-2">
                                     <div className="relative">
                                         <input
                                             id="password_confirmation"
@@ -456,11 +488,11 @@ export default function Register() {
                                             onFocus={() => setFocusedField('password')}
                                             onBlur={() => setFocusedField(null)}
                                             placeholder=" "
-                                            className="peer w-full px-3 py-3 sm:py-4 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800 pr-10"
+                                            className="peer w-full px-3 py-2 sm:py-3 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:border-blue-600 dark:focus:border-blue-500 focus:ring-1 focus:ring-blue-600 dark:focus:ring-blue-500 focus:outline-none transition-colors placeholder-transparent bg-white dark:bg-gray-800 pr-10"
                                         />
                                         <label 
                                             htmlFor="password_confirmation"
-                                            className="absolute left-3 -top-2.5 text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
+                                            className="absolute left-3 -top-2 text-xs sm:text-sm text-gray-600 dark:text-gray-400 transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-2 peer-focus:-top-2 peer-focus:text-xs peer-focus:text-blue-600 dark:peer-focus:text-blue-500 bg-white dark:bg-gray-800 px-1"
                                         >
                                             Confirm
                                         </label>
@@ -469,11 +501,11 @@ export default function Register() {
                                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none"
                                             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                         >
-                                            {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                                            {showConfirmPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                                         </button>
                                     </div>
                                     {errors.password_confirmation && (
-                                        <p className="text-sm text-red-600 dark:text-red-400">{errors.password_confirmation}</p>
+                                        <p className="text-xs sm:text-sm text-red-600 dark:text-red-400">{errors.password_confirmation}</p>
                                     )}
                                 </div>
                             </div>
@@ -487,11 +519,11 @@ export default function Register() {
                             </p>
 
                             {/* Buttons */}
-                            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+                            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-1 sm:pt-2">
                                 <button
                                     type="submit"
                                     disabled={processing}
-                                    className="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-70 text-white rounded-md transition-all font-medium min-w-24 flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900"
+                                    className="px-4 sm:px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:opacity-70 text-white rounded-md transition-all font-medium min-w-24 flex items-center justify-center shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 dark:from-blue-700 dark:to-blue-800 dark:hover:from-blue-800 dark:hover:to-blue-900 text-sm sm:text-base"
                                 >
                                     {processing ? (
                                         <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -504,7 +536,7 @@ export default function Register() {
                                 
                                 <Link
                                     href={route('login')}
-                                    className="px-6 py-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700 rounded-md transition-colors text-center font-medium border border-blue-200 hover:border-blue-300 dark:border-gray-600 dark:hover:border-gray-500 flex items-center justify-center"
+                                    className="px-4 sm:px-6 py-2 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-gray-700 rounded-md transition-colors text-center font-medium border border-blue-200 hover:border-blue-300 dark:border-gray-600 dark:hover:border-gray-500 flex items-center justify-center text-sm sm:text-base"
                                 >
                                     <span className="flex items-center">
                                         <span className="mr-1 text-xs opacity-80">←</span> Sign in instead
@@ -514,29 +546,29 @@ export default function Register() {
                         </form>
 
                         {/* OAuth Options */}
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                             <div className="relative">
                                 <div className="absolute inset-0 flex items-center">
                                     <div className="w-full border-t border-gray-300 dark:border-gray-600" />
                                 </div>
-                                <div className="relative flex justify-center text-sm">
+                                <div className="relative flex justify-center text-xs sm:text-sm">
                                     <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">or</span>
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                 <button 
                                     type="button"
-                                    className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
+                                    className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
                                 >
-                                    <FaGoogle className="h-4 w-4 text-red-500 mr-2" />
+                                    <FaGoogle className="h-3 sm:h-4 w-3 sm:w-4 text-red-500 mr-1 sm:mr-2" />
                                     Google
                                 </button>
                                 <button 
                                     type="button"
-                                    className="flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
+                                    className="flex items-center justify-center px-3 sm:px-4 py-1.5 sm:py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800"
                                 >
-                                    <FaGithub className="h-4 w-4 text-gray-900 dark:text-white mr-2" />
+                                    <FaGithub className="h-3 sm:h-4 w-3 sm:w-4 text-gray-900 dark:text-white mr-1 sm:mr-2" />
                                     GitHub
                                 </button>
                             </div>

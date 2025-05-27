@@ -24,6 +24,8 @@ use Inertia\Inertia;
 |
 */
 
+
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -66,6 +68,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/digital-card', [DashboardController::class, 'digitalCard'])->name('digital-card');
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications');
     Route::get('/reminders', [DashboardController::class, 'reminders'])->name('reminders');
+
 });
 
 Route::middleware(['auth'])->group(function () {
