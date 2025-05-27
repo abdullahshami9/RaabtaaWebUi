@@ -5,8 +5,13 @@ import { createRoot } from 'react-dom/client';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { DarkModeProvider } from '@/Contexts/DarkModeContext';
+import axios from 'axios';
+import ErrorBoundary from '@/Components/ErrorBoundary';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -16,9 +21,11 @@ createInertiaApp({
     },
     setup({ el, App, props }) {
         createRoot(el).render(
-            <DarkModeProvider>
-                <App {...props} />
-            </DarkModeProvider>
+            <ErrorBoundary>
+                <DarkModeProvider>
+                    <App {...props} />
+                </DarkModeProvider>
+            </ErrorBoundary>
         );
     },
     progress: {

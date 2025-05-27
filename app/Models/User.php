@@ -54,4 +54,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(SocialLink::class);
     }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
+    }
 }

@@ -18,4 +18,25 @@ class DashboardController extends Controller
             'colors' => Color::all()
         ]);
     }
+
+    public function digitalCard()
+    {
+        return Inertia::render('DigitalCard/Index', [
+            'auth' => ['user' => auth()->user()]
+        ]);
+    }
+
+    public function notifications()
+    {
+        return Inertia::render('Notifications/Index', [
+            'auth' => ['user' => auth()->user()]
+        ]);
+    }
+
+    public function reminders()
+    {
+        return Inertia::render('Reminders/Index', [
+            'auth' => ['user' => auth()->user()]
+        ]);
+    }
 } 

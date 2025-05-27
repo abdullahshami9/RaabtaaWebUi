@@ -6,3 +6,7 @@ createInertiaApp({
     },
     // ... rest of your config
 }); 
+
+import '@material/web/all.js';
+import '@material/web/button/filled-button.js';
+import '@material/web/textfield/outlined-text-field.js'; 

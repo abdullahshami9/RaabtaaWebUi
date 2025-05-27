@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\User;
 use App\Models\SocialLink;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class SurveyController extends Controller
 {
@@ -25,25 +26,48 @@ class SurveyController extends Controller
         try {
             DB::beginTransaction();
 
-            $validated = $request->validate([
+            $baseValidation = [
                 'usage_type' => 'required|in:personal,business',
-                'selected_platforms' => 'required|array',
+                'selected_platforms' => 'required|array|min:1',
                 'social_links' => 'required|array'
-            ]);
+            ];
 
-            // Update user
+            $validatedData = $request->validate($baseValidation);
+
+            // Validate social links format
+            foreach ($validatedData['social_links'] as $platform => $url) {
+                if (!empty($url) && !filter_var($url, FILTER_VALIDATE_URL)) {
+                    throw ValidationException::withMessages([
+                        'social_links' => "Invalid URL format for $platform"
+                    ]);
+                }
+            }
+
+            if ($validatedData['usage_type'] === 'business') {
+                $request->validate([
+                    'payment.card_holder_name' => 'required|string|max:255',
+                    'payment.card_number' => 'required|digits:16',
+                    'payment.expiry_date' => ['required', 'regex:/^(0[1-9]|1[0-2])\/\d{2}$/'],
+                    'payment.cvc' => 'required|digits_between:3,4'
+                ]);
+                
+                // Store only last 4 digits of card number
+                $validatedData['payment']['card_number'] = substr(
+                    $request->input('payment.card_number'), -4
+                );
+            }
+
+            // Update user and social links
             $user = auth()->user();
             $user->update([
-                'usage_type' => $validated['usage_type'],
+                'usage_type' => $validatedData['usage_type'],
                 'has_completed_survey' => true
             ]);
 
-            // Delete existing social links if any
+            // Sync social links
             $user->socialLinks()->delete();
-
-            // Store social links
-            foreach ($validated['social_links'] as $platform => $url) {
-                if (!empty($url)) { // Only store if URL is provided
+            foreach ($validatedData['social_links'] as $platform => $url) {
+                if (!empty($url)) {
                     $user->socialLinks()->create([
                         'platform' => $platform,
                         'url' => $url
@@ -51,13 +75,28 @@ class SurveyController extends Controller
                 }
             }
 
+            // Handle business payment
+            if ($validatedData['usage_type'] === 'business') {
+                $user->payments()->updateOrCreate(
+                    ['user_id' => $user->id],
+                    $request->input('payment')
+                );
+            }
+
             DB::commit();
 
-            return redirect()->route('dashboard')->with('success', 'Profile setup completed successfully!');
+            return response()->json([
+                'redirect' => $validatedData['usage_type'] === 'business' 
+                    ? route('store') 
+                    : route('dashboard'),
+                'message' => 'Profile setup completed successfully!'
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Something went wrong. Please try again.');
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
         }
     }
 } 

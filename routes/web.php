@@ -6,6 +6,9 @@ use App\Http\Controllers\ColorController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\SocialLinkController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\StoreController;
+use App\Http\Controllers\RemindersController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -34,10 +37,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    // Profile Routes
+    Route::prefix('profile')->group(function () {
+        Route::get('/', [ProfileController::class, 'show'])->name('profile.show');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::patch('/update', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
     
     // Notes
     Route::get('/notes', [NotesController::class, 'index']);
@@ -55,11 +61,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/social-links/{socialLink}', [SocialLinkController::class, 'update']);
     Route::delete('/social-links/{socialLink}', [SocialLinkController::class, 'destroy']);
     Route::post('/social-links/reorder', [SocialLinkController::class, 'reorder']);
+    
+    // New routes
+    Route::get('/digital-card', [DashboardController::class, 'digitalCard'])->name('digital-card');
+    Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications');
+    Route::get('/reminders', [DashboardController::class, 'reminders'])->name('reminders');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/payments', [PaymentController::class, 'index'])->name('payments');
+    Route::get('/store', [StoreController::class, 'index'])->name('store');
+    Route::get('/reminders', [RemindersController::class, 'index'])->name('reminders');
 });
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/survey', [SurveyController::class, 'show'])->name('survey');
-    Route::post('/survey', [SurveyController::class, 'store']);
+    Route::post('/survey', [SurveyController::class, 'store'])->name('survey.store');
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/payments', [PaymentController::class, 'store']);
+    Route::put('/payments/{payment}', [PaymentController::class, 'update']);
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';

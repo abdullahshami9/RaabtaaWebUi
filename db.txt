@@ -1,0 +1,128 @@
+-- Users Table
+CREATE TABLE users (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    email_verified_at TIMESTAMP NULL,
+    password VARCHAR(255) NOT NULL,
+    remember_token VARCHAR(100) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Skills Table
+CREATE TABLE skills (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    icon VARCHAR(255) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Notes Table
+CREATE TABLE notes (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    color VARCHAR(50) NULL,
+    is_pinned BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Digital Cards Table
+CREATE TABLE digital_cards (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    job_title VARCHAR(255) NULL,
+    email VARCHAR(255) NULL,
+    phone VARCHAR(20) NULL,
+    profile_image VARCHAR(255) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Social Links Table
+CREATE TABLE social_links (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    platform VARCHAR(255) NOT NULL,
+    url VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Settings Table
+CREATE TABLE settings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    theme VARCHAR(50) DEFAULT 'light',
+    language VARCHAR(50) DEFAULT 'en',
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Activity Logs Table
+CREATE TABLE activity_logs (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    activity_type VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    created_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Stores Table
+CREATE TABLE stores (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    location VARCHAR(255) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Categories Table
+CREATE TABLE categories (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL
+);
+
+-- Products Table
+CREATE TABLE products (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    store_id BIGINT UNSIGNED NOT NULL,
+    category_id BIGINT UNSIGNED NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL DEFAULT 0,
+    image VARCHAR(255) NULL,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (store_id) REFERENCES stores(id) ON DELETE CASCADE,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE
+);
+
+-- Cart Table
+CREATE TABLE cart (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT UNSIGNED NOT NULL,
+    product_id BIGINT UNSIGNED NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    created_at TIMESTAMP NULL,
+    updated_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+); 
