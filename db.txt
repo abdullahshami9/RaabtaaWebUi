@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 -- Users Table
 CREATE TABLE users (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -126,3 +127,177 @@ CREATE TABLE cart (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 ); 
+=======
+-- Create users table
+CREATE TABLE `users` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` varchar(191) NOT NULL,
+    `email` varchar(191) NOT NULL UNIQUE,
+    `email_verified_at` timestamp NULL DEFAULT NULL,
+    `password` varchar(191) NOT NULL,
+    `remember_token` varchar(100) DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create password_reset_tokens table
+CREATE TABLE `password_reset_tokens` (
+    `email` varchar(191) NOT NULL,
+    `token` varchar(191) NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create failed_jobs table
+CREATE TABLE `failed_jobs` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `uuid` varchar(191) NOT NULL UNIQUE,
+    `connection` text NOT NULL,
+    `queue` text NOT NULL,
+    `payload` longtext NOT NULL,
+    `exception` longtext NOT NULL,
+    `failed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create personal_access_tokens table
+CREATE TABLE `personal_access_tokens` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `tokenable_type` varchar(191) NOT NULL,
+    `tokenable_id` bigint(20) UNSIGNED NOT NULL,
+    `name` varchar(191) NOT NULL,
+    `token` varchar(64) NOT NULL UNIQUE,
+    `abilities` text DEFAULT NULL,
+    `last_used_at` timestamp NULL DEFAULT NULL,
+    `expires_at` timestamp NULL DEFAULT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`, `tokenable_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create notes table
+CREATE TABLE `notes` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) UNSIGNED NOT NULL,
+    `title` varchar(191) NOT NULL,
+    `content` text,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    INDEX `notes_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create social_accounts table
+CREATE TABLE `social_accounts` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) UNSIGNED NOT NULL,
+    `provider_id` varchar(191) NOT NULL,
+    `provider_name` varchar(191) NOT NULL,
+    `provider_token` text,
+    `provider_refresh_token` text,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    UNIQUE INDEX `social_accounts_provider_id_provider_name_unique` (`provider_id`, `provider_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create sessions table
+CREATE TABLE `sessions` (
+    `id` varchar(191) NOT NULL,
+    `user_id` bigint(20) UNSIGNED NULL,
+    `ip_address` varchar(45) NULL,
+    `user_agent` text NULL,
+    `payload` longtext NOT NULL,
+    `last_activity` int NOT NULL,
+    PRIMARY KEY (`id`),
+    INDEX `sessions_user_id_index` (`user_id`),
+    INDEX `sessions_last_activity_index` (`last_activity`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create migrations table
+CREATE TABLE `migrations` (
+    `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `migration` varchar(191) NOT NULL,
+    `batch` int(11) NOT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create cache table
+CREATE TABLE `cache` (
+    `key` varchar(191) NOT NULL,
+    `value` mediumtext NOT NULL,
+    `expiration` int(11) NOT NULL,
+    PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create cache_locks table
+CREATE TABLE `cache_locks` (
+    `key` varchar(191) NOT NULL,
+    `owner` varchar(191) NOT NULL,
+    `expiration` int(11) NOT NULL,
+    PRIMARY KEY (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create social_links table
+CREATE TABLE `social_links` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id` bigint(20) UNSIGNED NOT NULL,
+    `platform` varchar(191) NOT NULL,
+    `url` varchar(191) NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+    INDEX `social_links_user_id_index` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create colors table
+CREATE TABLE `colors` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` varchar(191) NOT NULL,
+    `code` varchar(191) NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create note_colors table (if there's a many-to-many relationship between notes and colors)
+CREATE TABLE `note_colors` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `note_id` bigint(20) UNSIGNED NOT NULL,
+    `color_id` bigint(20) UNSIGNED NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`note_id`) REFERENCES `notes` (`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`color_id`) REFERENCES `colors` (`id`) ON DELETE CASCADE,
+    UNIQUE INDEX `note_colors_note_id_color_id_unique` (`note_id`, `color_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create tags table (if you have tagging functionality)
+CREATE TABLE `tags` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` varchar(191) NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE INDEX `tags_name_unique` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Create note_tags table (for note tagging)
+CREATE TABLE `note_tags` (
+    `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `note_id` bigint(20) UNSIGNED NOT NULL,
+    `tag_id` bigint(20) UNSIGNED NOT NULL,
+    `created_at` timestamp NULL DEFAULT NULL,
+    `updated_at` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`id`),
+    FOREIGN KEY (`note_id`) REFERENCES `notes` (`id`) ON DELETE CASCADE,
+    FOREIGN KEY (`tag_id`) REFERENCES `tags` (`id`) ON DELETE CASCADE,
+    UNIQUE INDEX `note_tags_note_id_tag_id_unique` (`note_id`, `tag_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci; 
+>>>>>>> f9243f9ae0da23879486939def205fb9befdbbf9
