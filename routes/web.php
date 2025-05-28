@@ -35,6 +35,8 @@ Route::get('/', function () {
     ]);
 });
 
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -65,9 +67,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/social-links/reorder', [SocialLinkController::class, 'reorder']);
     
     // New routes
-    Route::get('/digital-card', [DashboardController::class, 'digitalCard'])->name('digital-card');
+    // web.php
+    
     Route::get('/notifications', [DashboardController::class, 'notifications'])->name('notifications');
     Route::get('/reminders', [DashboardController::class, 'reminders'])->name('reminders');
+    Route::get('/{businessName}', [DashboardController::class, 'digitalCard'])
+     ->name('business-profile'); // Give it a proper name
 
 });
 

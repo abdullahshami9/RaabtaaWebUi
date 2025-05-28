@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\SocialLink;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Str;
 
 class SurveyController extends Controller
 {
@@ -80,9 +81,12 @@ class SurveyController extends Controller
 
             // Handle business info
             if ($validatedData['usage_type'] === 'business') {
+
+                $slug = Str::slug($request->business_name);
                 $user->userIndustry()->updateOrCreate(
                     ['user_id' => $user->id],
                     [
+                        'business_name_slug' => $slug,
                         'business_name' => $request->input('business_info.business_name'),
                         'parent_industry_id' => $request->input('business_info.parent_industry_id'),
                         'child_industry_id' => $request->input('business_info.child_industry_id')

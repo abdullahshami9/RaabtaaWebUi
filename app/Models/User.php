@@ -64,4 +64,19 @@ class User extends Authenticatable
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function skills()
+    {
+        return $this->belongsToMany(Skill::class,'user_skill')
+            ->withPivot('proficiency')
+            ->withTimestamps();
+    }
+
+    public function achievements()
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievement')
+            ->withPivot(['achieved_at', 'notes'])
+            ->withTimestamps();
+    }
+
 }

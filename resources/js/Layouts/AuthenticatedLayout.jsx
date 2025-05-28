@@ -66,10 +66,16 @@ export default function AuthenticatedLayout({ user, header, children, searchQuer
             visible: true // Always visible
         },
         {
-            name: 'Card',
+            name: 'My Card',
             icon: <FaIdCard className="w-5 h-5" />,
-            route: route('digital-card'),
-            visible: true // Always visible
+            route: user?.user_industry?.business_name_slug
+                ? route('business-profile', { businessName: user.user_industry.business_name_slug })
+                : route('profile.edit'), // Fallback to profile if no business name
+            visible: true,
+            disabled: !user?.user_industry?.business_name_slug,
+            tooltip: !user?.user_industry?.business_name_slug 
+                ? "Complete your business profile to access this feature" 
+                : null
         },
         {
             name: 'Profile',
